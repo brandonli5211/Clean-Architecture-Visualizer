@@ -232,13 +232,24 @@ export class GraphVerificationInteractor implements GraphVerificationInputBounda
  
             result.push({
                 filePath,
-                fileType: filePath.endsWith(".java") ? "java" : "not_java",
+                fileType: this.determineFileType(filePath),
                 layer,
                 node,
             });
         }
  
         return result;
+    }
+
+    /**
+     * Helper function to return the fileType based on the filePath
+     */
+    private determineFileType(filePath: string): "java" | "python" | "javascript" | "typescript" | "unknown" {
+        if (filePath.endsWith(".java")) return "java";
+        if (filePath.endsWith(".py")) return "python";
+        if (filePath.endsWith(".js")) return "javascript";
+        if (filePath.endsWith(".ts") || filePath.endsWith(".tsx")) return "typescript";
+        return "unknown";
     }
 
     private buildNodeStorageList(files: FileStorage[]): NodeStorage[] {

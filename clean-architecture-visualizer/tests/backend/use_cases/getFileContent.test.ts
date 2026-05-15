@@ -25,23 +25,47 @@ function makeOutputData(): GetFileContentOutputData & { result: any } {
     };
 }
 
-const mockFile: FileStorage = {
+const mockFile: FileStorage[] = [{
     filePath: "/src/interface_adapters/UserSignupController.java",
     fileType: "java",
     layer: "interfaceAdapters",
     node: "controller",
-};
+}, {
+    filePath: "/src/interface_adapters/UserSignupController.py",
+    fileType: "python",
+    layer: "interfaceAdapters",
+    node: "controller",
+}, {
+    filePath: "/src/interface_adapters/UserSignupController.js",
+    fileType: "javascript",
+    layer: "interfaceAdapters",
+    node: "controller",
+}, {
+    filePath: "/src/interface_adapters/UserSignupController.ts",
+    fileType: "typescript",
+    layer: "interfaceAdapters",
+    node: "controller",
+}, {
+    filePath: "/src/interface_adapters/UserSignupController.tsx",
+    fileType: "typescript",
+    layer: "interfaceAdapters",
+    node: "controller",
+}]
 
 describe("GetFileContentInteractor", () => {
 
     describe("getFileContent — file found in DB", () => {
 
         beforeEach(() => {
-            genericDBAccess.upsertFile(mockFile);
+            for (const file of mockFile) {
+                genericDBAccess.upsertFile(file);
+            }
         });
 
         afterEach(() => {
-            genericDBAccess.removeFile(mockFile.filePath);
+            for (const file of mockFile) {
+                genericDBAccess.removeFile(file.filePath);
+            }
         });
 
         it("sets file_path on the output data", async () => {
@@ -74,24 +98,64 @@ describe("GetFileContentInteractor", () => {
             expect(outputData.result?.language).toBe("java");
         });
 
-        it("sets language to 'not_java' for non-java files", async () => {
-            const tsFile: FileStorage = {
-                filePath: "/src/interface_adapters/UserSignupController.ts",
-                fileType: "not_java",
-                layer: "interfaceAdapters",
-                node: "controller",
-            };
-            genericDBAccess.upsertFile(tsFile);
+        it("sets language to 'python' for python files", async () => {
+            const inputData = makeInputData("/src/interface_adapters/UserSignupController.py");
+            const outputData = makeOutputData();
+            const interactor = new GetFileContentInteractor(genericDBAccess, genericFileAccess, inputData, outputData);
 
+            await interactor.getFileContent();
+
+            expect(outputData.result?.language).toBe("python");
+        });
+
+        it("sets language to 'javascript' for javascript files", async () => {
+            const inputData = makeInputData("/src/interface_adapters/UserSignupController.js");
+            const outputData = makeOutputData();
+            const interactor = new GetFileContentInteractor(genericDBAccess, genericFileAccess, inputData, outputData);
+
+            await interactor.getFileContent();
+
+            expect(outputData.result?.language).toBe("javascript");
+        });
+
+        it("sets language to 'typescript' for typescript files ending with .ts", async () => {
             const inputData = makeInputData("/src/interface_adapters/UserSignupController.ts");
             const outputData = makeOutputData();
             const interactor = new GetFileContentInteractor(genericDBAccess, genericFileAccess, inputData, outputData);
 
             await interactor.getFileContent();
 
-            expect(outputData.result?.language).toBe("not_java");
+            expect(outputData.result?.language).toBe("typescript");
+        });
 
-            genericDBAccess.removeFile(tsFile.filePath);
+        it("sets language to 'typescript' for typescript files ending with .tsx", async () => {
+            const inputData = makeInputData("/src/interface_adapters/UserSignupController.tsx");
+            const outputData = makeOutputData();
+            const interactor = new GetFileContentInteractor(genericDBAccess, genericFileAccess, inputData, outputData);
+
+            await interactor.getFileContent();
+
+            expect(outputData.result?.language).toBe("typescript");
+        });
+
+        it("sets language to 'unknown' for unrecognized file types", async () => {
+            const txtFile: FileStorage = {
+                filePath: "/src/interface_adapters/UserSignupController.txt",
+                fileType: "unknown",
+                layer: "interfaceAdapters",
+                node: "controller",
+            };
+            genericDBAccess.upsertFile(txtFile);
+
+            const inputData = makeInputData("/src/interface_adapters/UserSignupController.txt");
+            const outputData = makeOutputData();
+            const interactor = new GetFileContentInteractor(genericDBAccess, genericFileAccess, inputData, outputData);
+
+            await interactor.getFileContent();
+
+            expect(outputData.result?.language).toBe("unknown");
+
+            genericDBAccess.removeFile(txtFile.filePath);
         });
 
         it("initialises violation fields as empty arrays", async () => {
