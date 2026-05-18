@@ -145,7 +145,7 @@ program
   .command('end')
   .description('Close the express server and clean the tempdir')
   .action(async() => {
-    
+    await app.runEndProject();
   })
 
 program.parse(process.argv);
