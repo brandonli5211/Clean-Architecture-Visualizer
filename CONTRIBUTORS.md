@@ -3,6 +3,7 @@ Anna Myllyniemi,
 Ethan Diep,
 Eric Xu,
 Matthew Dahlgren,
+Raymond Wu,
 Seokjin Yoo,
 Vithu Thayalan,
 Vivian Deng
